@@ -58,7 +58,7 @@ class SyncNetworks:
             **self.attr)
         self.destination_networks: list[NetworkV4] = NetworkV4.search_all(
             self.destination,
-            **self.attr)[2:]
+            **self.attr)[]
         self.compare(self.source_networks, self.destination_networks)
         if self.execute:
             logger.info('Writing changes')
