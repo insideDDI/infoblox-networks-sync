@@ -13,7 +13,46 @@ pydantic = "^1.10.7"
 PyYAML = "^6.0"
 
 [tool.poetry.dev-dependencies]
+ruff = "^0.0.259"
+mypy = "^1.1.1"
+tox = "^4.4.8"
+pydocstyle = "^6.3.0"
+unittest = "^0.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.tox]
+legacy_tox_ini = """
+
+[tox]
+skipsdist=True
+envlist = py311,ruff,pydocstyle,mypy
+
+[testenv]
+app = infoblox_network_sync
+setenv = VIRTUAL_ENV={envdir}
+envdir = {toxinidir}/.tox/py3
+deps =
+    poetry
+sitepackages = false
+commands =
+    poetry install -v
+allowlist_externals = mypy
+                      pydocstyle
+                      ruff
+
+[testenv:ruff]
+commands = ruff {[testenv]app}
+
+[testenv:pydocstyle]
+commands = pydocstyle {[testenv]app}
+
+[pydocstyle]
+convention = numpy
+
+[testenv:mypy]
+commands = mypy {[testenv]app}
+
+"""
