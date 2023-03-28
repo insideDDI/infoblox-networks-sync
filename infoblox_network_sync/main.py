@@ -11,7 +11,10 @@ from logger import logger
 
 class SyncNetworks:
     return_fields = ["extattrs"]
-    attr = {"return_fields": return_fields}
+    attr = {
+        "return_fields": return_fields,
+        "paging": True
+    }
 
     def __init__(
             self,
@@ -58,7 +61,7 @@ class SyncNetworks:
             **self.attr)
         self.destination_networks: list[NetworkV4] = NetworkV4.search_all(
             self.destination,
-            **self.attr)[]
+            **self.attr)
         self.compare(self.source_networks, self.destination_networks)
         if self.execute:
             logger.info('Writing changes')
