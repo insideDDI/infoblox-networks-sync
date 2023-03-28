@@ -12,7 +12,7 @@ if __name__ == "__main__":
     parser.add_argument("source_hostname")
     parser.add_argument("destination_hostname")
     parser.add_argument(
-        "execute", "--execute",
+        "--execute",
         action='store_true',
         default=False)
     args = parser.parse_args()
