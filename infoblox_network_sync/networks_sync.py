@@ -1,5 +1,5 @@
 """Network sync class."""
-from typing import Tuple
+from typing import TypeVar
 
 from infoblox_client.connector import Connector
 from infoblox_client.objects import NetworkV4
@@ -7,10 +7,12 @@ from infoblox_client.objects import NetworkV4
 from conf.infoblox import Infoblox
 from logger import logger
 
+T = TypeVar("T", bound="SyncNetworks")
+
 
 class SyncNetworks:
-    """Network objects sync wrapper.
-    """
+    """Network objects sync wrapper."""
+
     return_fields = ["extattrs"]
     attr = {
         "return_fields": return_fields,
@@ -34,10 +36,10 @@ class SyncNetworks:
 
     @classmethod
     def setUp(
-            cls,
+            cls: type[T],
             source_hostname: str,
-            destination_hostname: str) -> Tuple(Connector, Connector):
-        """Helper method to establish connectors.
+            destination_hostname: str) -> T:
+        """Instantiate class based on hostnames.
 
         Parameters
         ----------
@@ -63,12 +65,7 @@ class SyncNetworks:
         ----------
         source_networks: desired networks state in source appliance
         destination_networks: actual destination networks state
-
-        Returns
-        -------
-
         """
-
         src_refs = set([network.ref for network in source_networks])
         dst_refs = set([network.ref for network in destination_networks])
 
@@ -86,7 +83,6 @@ class SyncNetworks:
 
     def sync_networks(self):
         """Automation wrapper."""
-
         self.source_networks: list[NetworkV4] = NetworkV4.search_all(
             self.source,
             **self.attr)
@@ -99,6 +95,7 @@ class SyncNetworks:
             self.create_networks()
 
     def create_networks(self):
+        """Create networks not present in the destination appliance DB."""
         for network in self._add_networks:
             NetworkV4.create(
                 self.destination,

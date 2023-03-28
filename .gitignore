@@ -1,2 +1,5 @@
 */hosts/*
 .idea
+.tox
+.ruff_cache
+.mypy_cache

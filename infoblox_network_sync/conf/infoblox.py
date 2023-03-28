@@ -10,7 +10,7 @@ class Infoblox:
     """Infoblox object."""
 
     @staticmethod
-    def login(filename: str) -> dict[str, str]:
+    def login(filename: str) -> dict[str, str | bool]:
         """Return login credentials.
 
         Parameters
@@ -21,8 +21,7 @@ class Infoblox:
         -------
         Login credentials
         """
-        cnf: Config
-        cnf = ConfigWrapper.read(filename)
+        cnf: Config = ConfigWrapper.read(filename)
 
         logger.debug(f'Retrieved secrets from {filename}: secrets')
         return {
@@ -36,6 +35,5 @@ class Infoblox:
     @staticmethod
     def connect(hostname: str) -> connector.Connector:
         """Return connector object."""
-        opts: dict[str, str]
-        opts = Infoblox.login(f'{hostname}.yaml')
+        opts: dict[str, str | bool] = Infoblox.login(f'{hostname}.yaml')
         return connector.Connector(opts)

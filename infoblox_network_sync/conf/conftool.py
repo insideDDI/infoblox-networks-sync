@@ -18,7 +18,7 @@ class Config(BaseSettings):
     username: str
     password: str
     hostname: str
-    api_version: str | None = None
+    api_version: str = ""
     ssl_validate: bool = True
 
 
