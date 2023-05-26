@@ -25,6 +25,9 @@ class SyncNetworks:
         "return_fields": ea_return_fields,
         "paging": True
     }
+    ea_migrate = {
+        'MigrateFlag': {'value': True} 
+    }
 
     def __init__(
             self,
@@ -39,8 +42,6 @@ class SyncNetworks:
         """
         self.source = source
         self.destination = destination
-        # self.ea_def_source = ea_def_source
-        # self.ea_def_destination = ea_def_destination
         self.execute = False
 
     @classmethod
@@ -93,7 +94,6 @@ class SyncNetworks:
         self._delete_networks = [
             n for n in destination_networks if n.ref in self._deleted]
 
-
     def compare_ea(
             self,
             source_eas: list[EADefinition],
@@ -107,9 +107,6 @@ class SyncNetworks:
         """
         src_ea_refs = set([ea.ref for ea in source_eas])
         dst_ea_refs = set([ea.ref for ea in destination_eas])
-
-        logger.info(source_eas)
-        logger.info(destination_eas)
 
         self._deleted_eas = dst_ea_refs - src_ea_refs
         self._new_eas = src_ea_refs - dst_ea_refs
@@ -139,8 +136,6 @@ class SyncNetworks:
             self.destination,
             **self.ea_attr
             )
-        logger.info(self.ea_def_source)
-        logger.info(self.ea_def_destination)
 
         self.compare(self.source_networks, self.destination_networks)
         self.compare_ea(self.ea_def_source, self.ea_def_destination)
@@ -149,7 +144,6 @@ class SyncNetworks:
             self.create_eas()
             self.create_networks()
             self.delete_networks()
-            # self.create_eas()
 
     def create_networks(self):
         """Create networks not present in the destination appliance DB."""
@@ -166,13 +160,21 @@ class SyncNetworks:
 
     def delete_networks(self):
         for network in self._delete_networks:
-            logger.info(f"Delete: {network.ref}")
-            self.destination.delete_object(network.ref) 
+            for ea_key, ea_value in self.ea_migrate.items():
+                if ea_key in network.extattrs.to_dict():
+                    if network.extattrs.get(ea_key) == ea_value['value']:
+                        logger.info(f"Delete aborted for EA flag: {ea_key}")
+                    else:
+                        logger.info(f"delete {network.ref}")
+                        self.destination.delete_object(network.ref)
+                else:
+                    logger.info(f"delete {network.ref}")
+                    self.destination.delete_object(network.ref)
 
     def create_eas(self):
         """Create EAs not present in the destination appliance DB."""
         for ea in self._add_eas:
-            logger.info(f"EAS PRZEMEK: {ea}")
+            logger.info(f"Create EAs definition: {ea}")
             ["comment", "name", "type",
             "default_value"]
             msg = EADefinition.create(
@@ -185,7 +187,3 @@ class SyncNetworks:
                 default_value=ea.default_value,
             )
             logger.info(msg)
-
-# TODO network_views = conn.get_object('networkview')
-# TODO returned_fields to be checked for network/EA/NetViews
-#
